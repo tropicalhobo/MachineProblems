@@ -1,0 +1,1 @@
+#translation of coordinates to center of pixel
