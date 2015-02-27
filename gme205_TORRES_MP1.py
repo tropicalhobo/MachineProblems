@@ -10,12 +10,12 @@ z = []
 inputDem = False
 while inputDem == False:
     try:
-        demFile = raw_input("Enter the DEM file: ")
+        demFile = raw_input("Enter the DEM file path: ")
         f = open(demFile, 'r')
         inputDem = True
     except IOError:
         print """\nCannot detect file.
-Please type again."""
+Please type the name correctly."""
         break
 
 #function to transform lower left coordinates to center of pixel
@@ -29,10 +29,10 @@ def formatXYZ(cols, rows, dx, dy, xll, yll, z, cX, cY):
     yUpperLeft = dy*rows+yll+cY #transform lower left coordinates to center of pixel
     xll = xll + cX
 
-    for o in range(0, rows-1, 1):#iterate per row 
+    for o in range(0, rows, 1):#iterate per row 
         yUpperLeft -= 1
         xCoord = xll
-        for p in range(0, cols-1, 1):#iterate per column
+        for p in range(0, cols, 1):#iterate per column
             values = str(xCoord)+delimit, str(yUpperLeft)+delimit, z[p]+'\n'
             xCoord += 1
             xyz.append(values)                              
@@ -67,13 +67,13 @@ def readASCII(f):
             j = i.strip()
             j = j.split()
             hdr[j[0]] = float(j[1])
-        elif i.isalpha() == False:            
+        elif i.isalpha() == False:#insert z values into a separate list            
             k = i.strip()
             k = k.split()
             for o in range(len(k)):
                 z.append(k[o])
             
-#function to create and write XYZ file
+#function to write formatted values to an empty XYZ file
 def writeXYZ(m, t):
     j = 0
     for i in xyz:     
@@ -82,18 +82,31 @@ def writeXYZ(m, t):
         j+=1
     m.close()
 
-#function to create histogram:
+#function to convert z values into integers:
+def convertZtoInt():
+    counter = 0
+    for obs in z:
+        s = int(float(obs))
+        z.remove(obs)
+        z.insert(counter, s)
+        countInt = z[0:1000].count(s)
+        counter += 1
+        print s, countInt
+        
 """
-def makeHistogram():
-
-"""
+#print histogram
+def printHistogram():
+    for integer in z:
+        intCount = z.count(integer)
+        print integer, intCount*'*'
+"""       
 
 demFile = "C:\Users\G Torres\Documents\UP Diliman Stuff\GmE 205\MachineProblems\dream_dem2.asc"
 
 f = open(demFile, 'r')
 readASCII(f)
 c = convertCoord(hdr['dx'], hdr['dy'])
-formatXYZ(hdr['ncols'], hdr['nrows'],hdr['dx'], hdr['dy'],
+formatXYZ(hdr['ncols'], hdr['nrows'], hdr['dx'], hdr['dy'],
          hdr['xllcorner'], hdr['yllcorner'], z, c[0], c[1])
 f.close()
 
@@ -102,5 +115,8 @@ h = "C:\Users\G Torres\Documents\UP Diliman Stuff\GmE 205\MachineProblems\\new.x
 s = open(h, 'w')
 writeXYZ(s, xyz)
 
+convertZtoInt()
+
+#printHistogram()
 
 
